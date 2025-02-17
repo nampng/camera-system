@@ -1,3 +1,6 @@
+#ifndef THREAD_H
+#define THREAD_H
+
 #include <pthread.h>
 #include <stdint.h>
 
@@ -14,3 +17,5 @@ typedef struct _ThreadArg {
 
 int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp);
 void freeThreadArg(ThreadArg *arg);
+
+#endif // THREAD_H
