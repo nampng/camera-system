@@ -7,8 +7,8 @@
 const int WINDOW_W = 800;
 const int WINDOW_H = 480;
 
-int running = 1;
-int ret = EXIT_SUCCESS;
+static int running = 1;
+static int ret = EXIT_SUCCESS;
 
 void processEvent(SDL_Event *event);
 
@@ -33,15 +33,8 @@ int main(int argc, char *argv[])
         if (window == NULL) {
                 SDL_Log("Failed to create window: %s\n", SDL_GetError());
                 ret = EXIT_FAILURE;
-                goto quit;
+                goto destroy_window;
         }
-
-        //SDL_Surface *windowSurface = SDL_GetWindowSurface(window);
-        //if (windowSurface == NULL) {
-        //        SDL_Log("Failed to get window surface: %s\n", SDL_GetError());
-        //        ret = EXIT_FAILURE;
-        //        goto destroy_window;
-        //}
 
         SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE);
         if (renderer == NULL) {
@@ -50,7 +43,7 @@ int main(int argc, char *argv[])
                 goto destroy_renderer;
         }
 
-        SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_W, WINDOW_H);
+        SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_W, WINDOW_H);
         if (texture == NULL) {
                 SDL_Log("Failed to create texture: %s\n", SDL_GetError());
                 ret = EXIT_FAILURE;
@@ -80,14 +73,11 @@ int main(int argc, char *argv[])
                 }
                 
                 SDL_LockTexture(texture, NULL, &rawPixels, &rawPitch); 
-                
+                pthread_mutex_lock(&threadArg.mutex);
                 if (rawPixels) {
-                        SDL_Log("Texture (%d), Buffer (%d)", rawPitch * WINDOW_H, threadArg.bufferSize);
-                        if (rawPitch * WINDOW_H <= threadArg.bufferSize) {
-                                memcpy(rawPixels, threadArg.buffer, rawPitch * WINDOW_H);
-                        } 
+                        memcpy(rawPixels, threadArg.buffer, rawPitch * WINDOW_H);
                 }
-
+                pthread_mutex_unlock(&threadArg.mutex);
                 SDL_UnlockTexture(texture);
                 
                 SDL_RenderCopy(renderer, texture, NULL, NULL);

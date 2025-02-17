@@ -8,9 +8,11 @@ int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp
 
         arg->stream = stream;
         arg->bufferSize = width * height * (bpp / 8);
-        arg->buffer = (uint8_t *)malloc(arg->bufferSize);
+        arg->buffer = (uint8_t *)calloc(arg->bufferSize, sizeof(uint8_t));
         arg->running = 1;
         if(pthread_mutex_init(&arg->mutex, NULL)) {
+                free(arg->buffer);
+                arg->buffer = NULL;
                 return -1;
         }
 

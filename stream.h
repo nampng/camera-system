@@ -4,8 +4,7 @@
 #include <gst/gst.h>
 
 typedef struct _Stream {
-        GstElement *pipeline;
-        GstElement *source, *raw, *sink;
+        GstElement *pipeline, *sink;
 } Stream;
 
 int initStream(Stream *stream);
