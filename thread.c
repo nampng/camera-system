@@ -1,18 +1,21 @@
 #include "thread.h"
+#include "fifo.h"
 #include <string.h>
 #include <stdlib.h>
 
-int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp)
+int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp, size_t numFrames)
 {
         memset(arg, 0, sizeof(ThreadArg));
 
         arg->stream = stream;
-        arg->bufferSize = width * height * (bpp / 8);
-        arg->buffer = (uint8_t *)calloc(arg->bufferSize, sizeof(uint8_t));
+        arg->frameSize = width * height * (bpp / 8);
+        arg->numFrames = numFrames;
         arg->running = 1;
+
+        initFifo(&arg->buffer, numFrames + 1, arg->frameSize);
+
         if(pthread_mutex_init(&arg->mutex, NULL)) {
-                free(arg->buffer);
-                arg->buffer = NULL;
+                freeFifo(&arg->buffer);
                 return -1;
         }
 
@@ -21,8 +24,6 @@ int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp
 
 void freeThreadArg(ThreadArg *arg)
 {
-        if (arg->buffer)
-                free(arg->buffer);
-
+        freeFifo(&arg->buffer);
         pthread_mutex_destroy(&arg->mutex);
 }

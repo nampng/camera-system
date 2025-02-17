@@ -3,6 +3,7 @@
 
 #include "stream.h"
 #include "thread.h"
+#include "fifo.h"
 
 const int WINDOW_W = 800;
 const int WINDOW_H = 480;
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
         }
 
         ThreadArg threadArg;
-        initThreadArg(&threadArg, &stream, WINDOW_W, WINDOW_H, 32);
+        initThreadArg(&threadArg, &stream, WINDOW_W, WINDOW_H, 32, 10);
 
         pthread_t streamThread;
         pthread_create(&streamThread, NULL, startStream, &threadArg);
@@ -73,11 +74,9 @@ int main(int argc, char *argv[])
                 }
                 
                 SDL_LockTexture(texture, NULL, &rawPixels, &rawPitch); 
-                pthread_mutex_lock(&threadArg.mutex);
                 if (rawPixels) {
-                        memcpy(rawPixels, threadArg.buffer, rawPitch * WINDOW_H);
+                        popFifo(&threadArg.buffer, rawPixels);
                 }
-                pthread_mutex_unlock(&threadArg.mutex);
                 SDL_UnlockTexture(texture);
                 
                 SDL_RenderCopy(renderer, texture, NULL, NULL);

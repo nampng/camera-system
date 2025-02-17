@@ -1,5 +1,6 @@
 #include "stream.h"
 #include "thread.h"
+#include "fifo.h"
 
 #include <string.h>
 #include <gst/video/video.h>
@@ -108,10 +109,7 @@ void *startStream(void *arg)
                         GstBuffer *buffer = gst_sample_get_buffer(sample);
                         GstMapInfo mapInfo;
                         if (gst_buffer_map(buffer, &mapInfo, GST_MAP_READ)) {
-                                g_print("Buffer size: %zu\n", mapInfo.size);
-                                pthread_mutex_lock(&threadArg->mutex);
-                                memcpy(threadArg->buffer, mapInfo.data, mapInfo.size);
-                                pthread_mutex_unlock(&threadArg->mutex);
+                                pushFifo(&threadArg->buffer, mapInfo.data);
                                 gst_buffer_unmap(buffer, &mapInfo);
                         }
                         gst_sample_unref(sample);
