@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <pthread.h>
 
 typedef struct _Fifo {
         void *data;
@@ -10,6 +11,7 @@ typedef struct _Fifo {
         size_t wp;
         size_t rp;
         size_t fifoSize;
+        pthread_mutex_t mutex;
 } Fifo;
 
 int initFifo(Fifo *fifo, size_t fifoSize, size_t typeSize);

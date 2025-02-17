@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int incWrap(size_t wp, size_t limit) {
+static int incWrap(size_t wp, size_t limit) {
     if (++wp == limit)
         wp = 0;
     return wp;
@@ -20,18 +20,29 @@ int initFifo(Fifo *fifo, size_t fifoSize, size_t typeSize)
         return -1;
     }
 
+    if(pthread_mutex_init(&fifo->mutex, NULL)) {
+        free(fifo->data);
+        fifo->data = NULL;
+        return -1;
+    }
+
     fifo->typeSize = typeSize;
     fifo->fifoSize = fifoSize;
+
+    return 0;
 }
 
 int pushFifo(Fifo *fifo, void *data)
 {
-    if (fifo == NULL)
+    if (fifo == NULL || data == NULL) 
         return -1;
 
+    int res = 0;
+    pthread_mutex_lock(&fifo->mutex);
     size_t next = incWrap(fifo->wp, fifo->fifoSize);
     if (next == fifo->rp) {
-        return -1;
+        res = -1;
+        goto cleanup;
     }
 
     char *pos = (char *)fifo->data + (fifo->wp * fifo->typeSize);
@@ -39,7 +50,9 @@ int pushFifo(Fifo *fifo, void *data)
 
     fifo->wp = next;
 
-    return 0;
+cleanup:
+    pthread_mutex_unlock(&fifo->mutex);
+    return res;
 }
 
 int popFifo(Fifo *fifo, void *out)
@@ -47,8 +60,11 @@ int popFifo(Fifo *fifo, void *out)
     if (fifo == NULL || out == NULL)
         return -1;
 
+    int res = 0;
+    pthread_mutex_lock(&fifo->mutex);
     if (fifo->rp == fifo->wp) {
-        return -1;
+        res = -1;
+        goto cleanup;
     }
 
     char *pos = (char *)fifo->data + (fifo->rp * fifo->typeSize);
@@ -56,7 +72,9 @@ int popFifo(Fifo *fifo, void *out)
 
     fifo->rp = incWrap(fifo->rp, fifo->fifoSize);
 
-    return 0;
+cleanup:
+    pthread_mutex_unlock(&fifo->mutex);
+    return res;
 }
 
 void freeFifo(Fifo *fifo)
@@ -68,4 +86,6 @@ void freeFifo(Fifo *fifo)
         free(fifo->data);
         fifo->data = NULL;
     }
+
+    pthread_mutex_destroy(&fifo->mutex);
 }
