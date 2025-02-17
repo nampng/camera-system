@@ -13,6 +13,8 @@ add_executable(gui
         thread.h
         stream.c
         stream.h
+        fifo.c
+        fifo.h
 )
 
 target_link_libraries(gui PRIVATE
