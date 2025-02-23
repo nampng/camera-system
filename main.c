@@ -20,6 +20,12 @@ void handleRightButton();
 
 int main(int argc, char *argv[])
 {
+        #ifdef ON_TARGET
+                printf("TARGET build.\n");
+        #else
+                printf("HOST build.\n");
+        #endif
+
         // init SDL
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
                 printf("Failed to initialize SDL: %s\n", SDL_GetError());
@@ -57,7 +63,7 @@ int main(int argc, char *argv[])
         if (buttonSurface == NULL) {
                 SDL_Log("Could not load button bitmap: %s\n", SDL_GetError());
                 ret = EXIT_FAILURE;
-                goto destroy_button_surface;
+                goto destroy_renderer;
         }
 
         SDL_Texture *buttonTexture = SDL_CreateTextureFromSurface(renderer, buttonSurface);
@@ -139,8 +145,6 @@ destroy_stream_texture:
         SDL_DestroyTexture(streamTexture);
 destroy_button_texture:
         SDL_DestroyTexture(buttonTexture);
-destroy_button_surface:
-        SDL_FreeSurface(buttonSurface);
 destroy_renderer:
         SDL_DestroyRenderer(renderer);
 destroy_window:

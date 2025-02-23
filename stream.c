@@ -102,7 +102,7 @@ void *startStream(void *arg)
                         gst_message_unref(msg);
                 }
 
-                g_print("Checking sink state...\n");
+                //g_print("Checking sink state...\n");
                 GstState currState, pendingState;
                 gst_element_get_state(stream->sink, &currState, &pendingState, GST_SECOND); 
 
@@ -110,7 +110,7 @@ void *startStream(void *arg)
                         continue;
                 }
 
-                g_print("Pulling sample...\n");
+                //g_print("Pulling sample...\n");
                 GstSample *sample = gst_app_sink_pull_sample(GST_APP_SINK(stream->sink));
                 if (sample != NULL) {
                         GstBuffer *buffer = gst_sample_get_buffer(sample);
