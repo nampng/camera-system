@@ -20,7 +20,7 @@ int initFifo(Fifo *fifo, size_t fifoSize, size_t typeSize)
         return -1;
     }
 
-    if(pthread_mutex_init(&fifo->mutex, NULL)) {
+    if (pthread_mutex_init(&fifo->mutex, NULL)) {
         free(fifo->data);
         fifo->data = NULL;
         return -1;

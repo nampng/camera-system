@@ -6,6 +6,8 @@
 #include <gst/video/video.h>
 #include <gst/app/gstappsink.h>
 
+
+
 int initStream(Stream *stream)
 {
         memset(stream, 0, sizeof(Stream));
@@ -13,7 +15,12 @@ int initStream(Stream *stream)
         GError *error = NULL;
         stream->pipeline = gst_parse_launch(
                 "rtspsrc location=rtsp://localhost:8554/test "
-                "! rtph264depay ! h264parse ! avdec_h264 "
+                "! rtph264depay ! h264parse "
+                #ifdef ON_TARGET
+                "! openh264dec "
+                #else
+                "! avdec_h264 "
+                #endif
                 "! videoconvert ! video/x-raw,width=800,height=480,format=RGBA "
                 "! appsink name=stream-sink sync=false", &error);
 

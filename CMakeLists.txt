@@ -7,6 +7,10 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 pkg_check_modules(gstreamer-1.0 REQUIRED gstreamer-1.0)
 pkg_check_modules(gstreamer-plugins-base-1.0 REQUIRED gstreamer-plugins-base-1.0)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/button.bmp
+     DESTINATION ${CMAKE_BINARY_DIR}
+)
+
 add_executable(gui
         main.c
         thread.c

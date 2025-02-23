@@ -12,7 +12,9 @@ int initThreadArg(ThreadArg *arg, Stream *stream, int width, int height, int bpp
         arg->numFrames = numFrames;
         arg->running = 1;
 
-        initFifo(&arg->buffer, numFrames + 1, arg->frameSize);
+        if(initFifo(&arg->buffer, numFrames + 1, arg->frameSize)) {
+                return -1;
+        }
 
         if(pthread_mutex_init(&arg->mutex, NULL)) {
                 freeFifo(&arg->buffer);
