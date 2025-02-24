@@ -5,8 +5,8 @@
 #include "thread.h"
 #include "fifo.h"
 
-const int WINDOW_W = 800;
-const int WINDOW_H = 480;
+const int WINDOW_W = 480;
+const int WINDOW_H = 800;
 
 static int running = 1;
 static int ret = EXIT_SUCCESS;
@@ -120,17 +120,17 @@ int main(int argc, char *argv[])
                 // in a sophisticated way. so... magic numbers.
                 // the screen will be always 800x480 anyways since that's the
                 // touchscreen's resolution
-                destRect.x = (float) (WINDOW_W - button_width) - (10 * 8);
-                destRect.y = (float) (WINDOW_H - button_height) / 2;
-                destRect.w = (float) button_width * 6;
-                destRect.h = (float) button_height * 4;
+                destRect.x = 0.0;
+                destRect.y = 0.0;
+                destRect.w = (float) button_width;
+                destRect.h = (float) button_height;
                 SDL_RenderCopy(renderer, buttonTexture, NULL, &destRect);
 
-                destRect.x = (float) (button_width) + (10 * 2);
-                destRect.y = (float) (WINDOW_H - button_height) / 2;
-                destRect.w = (float) button_width * 6;
-                destRect.h = (float) button_height * 4;
-                SDL_RenderCopy(renderer, buttonTexture, NULL, &destRect);
+                destRect.x = (float) 0.0;
+                destRect.y = (float) (WINDOW_H - button_height);
+                destRect.w = (float) button_width;
+                destRect.h = (float) button_height;
+                SDL_RenderCopyEx(renderer, buttonTexture, NULL, &destRect, 0, NULL, SDL_FLIP_VERTICAL);
 
                 SDL_RenderPresent(renderer);
         }
@@ -176,18 +176,30 @@ void handleRightButton()
 void processEvent(SDL_Event *event) 
 {
         switch (event->type) {
+        case SDL_FINGERDOWN:
+                Sint32 x = (Sint32) event->tfinger.x * WINDOW_W;
+                Sint32 y = (Sint32) event->tfinger.y * WINDOW_H; 
+                printf("touch: x: %d, y: %d\n", event->tfinger.x, event->tfinger.y);
+                printf("processed: x: %d, y: %d\n", x, y);
+
+                if (inRegion(x, y, 0, 0, 100, 200)) {
+                        handleLeftButton();
+                }
+                if (inRegion(x, y, 0, 600, 100, 800)) {
+                        handleRightButton();
+                }
+                break;
         case SDL_MOUSEBUTTONDOWN:
-                //printf("x: %d, y: %d\n", event->button.x, event->button.y);
                 // left button:
-                // top left corner: x: 35 y: 240
-                // bottom right corner: x: 101 y: 277
-                if (inRegion(event->button.x, event->button.y, 35, 240, 101, 277)) {
+                // top left corner: x: 0 y: 0
+                // bottom right corner: x: 100 y: 200
+                if (inRegion(event->button.x, event->button.y, 0, 0, 100, 200)) {
                         handleLeftButton();
                 }
                 // right button:
-                // top left corner: x: 710 y: 240
-                // bottom right corner: x: 777 y: 277
-                if (inRegion(event->button.x, event->button.y, 710, 240, 777, 277)) {
+                // top left corner: x: 0 y: 600
+                // bottom right corner: x: 100 y: 800
+                if (inRegion(event->button.x, event->button.y, 0, 600, 100, 800)) {
                         handleRightButton();
                 }
                 break;

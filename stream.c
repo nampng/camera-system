@@ -14,14 +14,15 @@ int initStream(Stream *stream)
 
         GError *error = NULL;
         stream->pipeline = gst_parse_launch(
-                "rtspsrc location=rtsp://localhost:8554/test "
+                "rtspsrc location=rtsp://192.168.1.100:8554/test "
                 "! rtph264depay ! h264parse "
                 #ifdef ON_TARGET
-                "! openh264dec "
+                "! openh264dec " // Target doesn't have avdec_h264 for some reason, use this instead until figured out
                 #else
                 "! avdec_h264 "
                 #endif
-                "! videoconvert ! video/x-raw,width=800,height=480,format=RGBA "
+                "! videoflip method=clockwise "
+                "! videoconvert ! video/x-raw,width=480,height=800,format=RGBA "
                 "! appsink name=stream-sink sync=false", &error);
 
 
